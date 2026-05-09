@@ -3,200 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Adrian Pro Dashboard</title>
+    <title>Adrian Crypto Pro</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-color: #050708; --card-bg: #12151a; --accent: #0088cc; --text-dim: #848e9c; }
-        body { font-family: 'Cairo', sans-serif; background-color: var(--bg-color); color: #ffffff; overflow-x: hidden; padding-bottom: 80px; }
-        
-        .glass-card { background: var(--card-bg); border: 1px solid #1f2328; border-radius: 24px; transition: 0.3s; }
-        .label-text { font-size: 11px; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        .input-group { background: #080a0c; border: 1px solid #2a2f36; border-radius: 16px; padding: 12px 16px; }
-        .input-group:focus-within { border-color: var(--accent); }
-        input { background: transparent; border: none; outline: none; width: 100%; font-size: 18px; font-weight: 700; color: #fff; text-align: left; }
-
-        .coin-row { border-bottom: 1px solid #1a1e23; padding: 14px 8px; display: flex; align-items: center; justify-content: space-between; transition: 0.2s; cursor: pointer; }
+        :root { --bg: #050708; --card: #12151a; --accent: #0088cc; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #fff; overflow-x: hidden; padding-bottom: 100px; }
+        .glass-card { background: var(--card); border: 1px solid #1f2328; border-radius: 20px; transition: 0.3s; }
+        .coin-row { padding: 16px; border-bottom: 1px solid #1a1e23; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
         .coin-row:last-child { border-bottom: none; }
-        .coin-row:active { background: rgba(255,255,255,0.03); }
-
-        .price-up { color: #02c076 !important; }
-        .price-down { color: #f84960 !important; }
-        
-        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(18, 21, 26, 0.95); backdrop-filter: blur(15px); border-top: 1px solid #1f2328; display: flex; justify-content: space-around; padding: 12px; z-index: 100; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-dim); font-size: 10px; font-weight: 700; }
-        .nav-item.active { color: var(--accent); }
-
-        .coin-icon { width: 32px; height: 32px; border-radius: 50%; background: #1a1e23; padding: 4px; object-fit: contain; }
+        .coin-row:active { background: rgba(255,255,255,0.05); }
+        .detail-sheet { position: fixed; bottom: -100%; left: 0; right: 0; height: 85vh; background: #0b0e11; border-top: 1px solid #1f2328; z-index: 1000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 30px 30px 0 0; padding: 20px; overflow-y: auto; }
+        .detail-sheet.active { bottom: 0; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 999; }
+        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(18, 21, 26, 0.95); backdrop-filter: blur(10px); border-top: 1px solid #1f2328; height: 85px; display: flex; align-items: center; justify-content: space-around; z-index: 500; }
+        .price-up { color: #02c076; } .price-down { color: #f84960; }
+        #user-avatar { object-fit: cover; width: 100%; height: 100%; }
     </style>
 </head>
-<body class="p-4">
+<body>
 
-    <header class="flex justify-between items-center mb-6 px-1">
-        <div>
-            <h1 class="text-xl font-black tracking-tight">ADRIAN <span class="text-[#0088cc]">PRO</span></h1>
-            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Live Market Engine
-            </p>
-        </div>
-        <button onclick="requestNotify()" class="bg-blue-600/10 p-2.5 rounded-xl border border-blue-600/20">
-            <svg width="20" height="20" fill="#0088cc" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-        </button>
+    <header class="p-6">
+        <h1 class="text-2xl font-black italic uppercase">ADRIAN <span class="text-blue-500">PRO</span></h1>
+        <p class="text-[10px] text-gray-500 font-bold tracking-widest mt-1 uppercase">Official Market Engine v4.0</p>
     </header>
 
-    <section id="price-card" class="glass-card p-6 mb-4 text-center shadow-2xl shadow-blue-900/10">
-        <span class="label-text">Toncoin (TON/USDT)</span>
-        <div id="price-content">
-            <div class="flex items-center justify-center gap-1 my-2">
-                <span id="main-price" class="text-5xl font-black tracking-tighter">0.00</span>
-                <span class="text-xl font-bold text-[#0088cc]">$</span>
-            </div>
-            <div id="price-change" class="text-[11px] font-black px-3 py-1 rounded-full inline-block">0.00%</div>
-        </div>
-    </section>
-
-    <section class="glass-card p-5 mb-4 overflow-hidden">
-        <div class="flex justify-between items-center mb-4">
-            <span class="label-text">أداء العملات الرقمية</span>
-            <span class="text-[9px] bg-white/5 px-2 py-1 rounded text-gray-500 font-bold">LIVE</span>
-        </div>
+    <section class="mx-4 glass-card overflow-hidden shadow-2xl">
         <div id="market-list">
-            <div class="animate-pulse flex flex-col gap-4">
-                <div class="h-10 bg-gray-800/50 rounded-xl"></div>
-                <div class="h-10 bg-gray-800/50 rounded-xl"></div>
-            </div>
+            <div class="p-10 text-center animate-pulse text-gray-600">جاري الاتصال بالسوق...</div>
         </div>
     </section>
 
-    <section class="glass-card p-5 mb-4">
-        <span class="label-text">أهداف محفظتك 🎯</span>
-        <div class="flex gap-2 mt-3">
-            <div class="input-group flex-1">
-                <span class="text-[9px] text-gray-500 block mb-1 uppercase">Target $</span>
-                <input type="number" id="target-price" value="10">
+    <div class="overlay" id="overlay" onclick="closeDetails()"></div>
+    <div class="detail-sheet" id="detail-sheet">
+        <div class="w-12 h-1 bg-gray-700 rounded-full mx-auto mb-6"></div>
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <div class="flex items-center gap-3">
+                    <img id="modal-icon" src="" class="w-10 h-10">
+                    <h2 id="modal-name" class="text-2xl font-black">---</h2>
+                </div>
+                <p id="modal-symbol" class="text-gray-500 text-xs mt-1 uppercase">---</p>
             </div>
-            <div class="input-group flex-1">
-                <span class="text-[9px] text-gray-500 block mb-1 uppercase">Amount</span>
-                <input type="number" id="my-hold" value="100">
+            <div class="text-left">
+                <p id="modal-price" class="text-2xl font-black font-mono">0.00$</p>
+                <p id="modal-iqd" class="text-xs font-bold text-yellow-500">0 د.ع</p>
             </div>
         </div>
-        <div class="mt-4 p-4 bg-blue-600/5 rounded-2xl border border-blue-600/10 text-center">
-            <span class="text-[10px] font-bold text-gray-500 block mb-1 uppercase">Estimated Balance</span>
-            <span id="target-res" class="text-2xl font-black text-blue-400">0 $</span>
-        </div>
-    </section>
-
-    <nav class="grid grid-cols-2 gap-3 mb-6">
-        <a href="https://fragment.com" class="glass-card p-4 text-center text-[11px] font-black uppercase">FRAGMENT</a>
-        <a href="https://tonviewer.com" class="glass-card p-4 text-center text-[11px] font-black uppercase">EXPLORER</a>
-    </nav>
-
-    <footer class="text-center pb-4">
-        <p class="text-[9px] text-gray-600 font-bold uppercase tracking-[0.4em]">Adrian Pro Engine • 2026</p>
-    </footer>
-
-    <div class="nav-bar">
-        <div class="nav-item active">
-            <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-            <span>السوق</span>
-        </div>
-        <div class="nav-item opacity-40">
-            <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-            <span>المحفظة</span>
+        <div id="chart-box" class="w-full h-64 glass-card overflow-hidden mb-6"></div>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white/5 p-4 rounded-2xl border border-white/5 text-center">
+                <span class="text-[10px] text-gray-500 block mb-1 uppercase font-bold">24h High</span>
+                <span id="stat-high" class="text-green-500 font-black font-mono">0.00$</span>
+            </div>
+            <div class="bg-white/5 p-4 rounded-2xl border border-white/5 text-center">
+                <span class="text-[10px] text-gray-500 block mb-1 uppercase font-bold">24h Low</span>
+                <span id="stat-low" class="text-red-500 font-black font-mono">0.00$</span>
+            </div>
         </div>
     </div>
 
-    <script>
-        const symbols = ['TONUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT', 'ADAUSDT', 'DOGEUSDT', 'TRXUSDT', 'AVAXUSDT'];
+    <div class="nav-bar">
+        <div class="flex flex-col items-center gap-1 text-gray-500" onclick="alert('قريباً')">
+            <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            <span class="text-[9px] font-bold">الإعدادات</span>
+        </div>
         
-        // روابط الصور الفعلية للعملات
-        const coinAssets = {
-            'TONUSDT': { name: 'Toncoin', icon: 'https://cryptologos.cc/logos/toncoin-ton-logo.png' },
-            'BTCUSDT': { name: 'Bitcoin', icon: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png' },
-            'ETHUSDT': { name: 'Ethereum', icon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png' },
-            'SOLUSDT': { name: 'Solana', icon: 'https://cryptologos.cc/logos/solana-sol-logo.png' },
-            'BNBUSDT': { name: 'Binance Coin', icon: 'https://cryptologos.cc/logos/bnb-bnb-logo.png' },
-            'XRPUSDT': { name: 'Ripple', icon: 'https://cryptologos.cc/logos/xrp-xrp-logo.png' },
-            'ADAUSDT': { name: 'Cardano', icon: 'https://cryptologos.cc/logos/cardano-ada-logo.png' },
-            'DOGEUSDT': { name: 'Dogecoin', icon: 'https://cryptologos.cc/logos/dogecoin-doge-logo.png' },
-            'TRXUSDT': { name: 'TRON', icon: 'https://cryptologos.cc/logos/tron-trx-logo.png' },
-            'AVAXUSDT': { name: 'Avalanche', icon: 'https://cryptologos.cc/logos/avalanche-avax-logo.png' }
+        <div class="flex flex-col items-center -mt-10">
+            <div class="w-16 h-16 rounded-full border-4 border-[#050708] bg-[#1a1e23] flex items-center justify-center overflow-hidden shadow-xl">
+                <img src="https://via.placeholder.com/100?text=👤" id="user-avatar" alt="User Avatar">
+            </div>
+            <span id="user-name" class="text-[10px] font-black text-white mt-1 uppercase tracking-wider">جاري التحميل...</span>
+        </div>
+
+        <div class="flex flex-col items-center gap-1 text-blue-500">
+            <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>
+            <span class="text-[9px] font-bold">التداول</span>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script>
+        // 1. تفعيل بيانات تليجرام الحقيقية
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // فتح التطبيق بالكامل
+
+        function loadUserData() {
+            const user = tg.initDataUnsafe?.user;
+            const userNameEl = document.getElementById('user-name');
+            const userAvatarEl = document.getElementById('user-avatar');
+
+            if (user) {
+                // عرض اسم المستخدم الفعلي
+                userNameEl.innerText = user.first_name + (user.last_name ? " " + user.last_name : "");
+                // عرض الصورة الشخصية إذا كانت متوفرة
+                if (user.photo_url) {
+                    userAvatarEl.src = user.photo_url;
+                }
+            } else {
+                userNameEl.innerText = "ADRIAN"; // اسم افتراضي في حال التشغيل خارج تليجرام
+            }
+        }
+        loadUserData();
+
+        // 2. إدارة بيانات السوق
+        const symbols = ['TONUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'PAXGUSDT'];
+        const coinNames = { 
+            'TONUSDT': {name: 'Toncoin', icon: 'https://cryptologos.cc/logos/toncoin-ton-logo.png'},
+            'BTCUSDT': {name: 'Bitcoin', icon: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png'},
+            'ETHUSDT': {name: 'Ethereum', icon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png'},
+            'SOLUSDT': {name: 'Solana', icon: 'https://cryptologos.cc/logos/solana-sol-logo.png'},
+            'BNBUSDT': {name: 'BNB', icon: 'https://cryptologos.cc/logos/bnb-bnb-logo.png'},
+            'PAXGUSDT': {name: 'Gold (Oz)', icon: 'https://cdn-icons-png.flaticon.com/512/2855/2855172.png'}
         };
         
-        let lastTonPrice = 0;
+        let iqdRate = 1460;
 
-        async function fetchMarketData() {
+        async function fetchMarket() {
             try {
                 const response = await fetch('https://api.binance.com/api/v3/ticker/24hr');
                 const data = await response.json();
                 const filtered = data.filter(item => symbols.includes(item.symbol));
                 
-                const listContainer = document.getElementById('market-list');
-                listContainer.innerHTML = '';
+                const list = document.getElementById('market-list');
+                list.innerHTML = '';
 
-                filtered.sort((a, b) => symbols.indexOf(a.symbol) - symbols.indexOf(b.symbol));
-
-                filtered.forEach(coin => {
+                filtered.sort((a,b) => symbols.indexOf(a.symbol) - symbols.indexOf(b.symbol)).forEach(coin => {
                     const price = parseFloat(coin.lastPrice);
                     const change = parseFloat(coin.priceChangePercent);
-                    const asset = coinAssets[coin.symbol];
-                    const colorClass = change >= 0 ? 'price-up' : 'price-down';
-                    
-                    if(coin.symbol === 'TONUSDT') {
-                        lastTonPrice = price;
-                        updatePrimary(price, change);
-                    }
+                    const asset = coinNames[coin.symbol];
 
-                    listContainer.innerHTML += `
-                        <div class="coin-row">
+                    list.innerHTML += `
+                        <div class="coin-row" onclick="showDetails('${coin.symbol}', '${price}', '${change}', '${coin.highPrice}', '${coin.lowPrice}')">
                             <div class="flex items-center gap-3">
-                                <img src="${asset.icon}" class="coin-icon" alt="${asset.name}">
+                                <img src="${asset.icon}" class="w-8 h-8 rounded-full">
                                 <div>
-                                    <p class="text-[13px] font-bold">${asset.name}</p>
-                                    <p class="text-[9px] text-gray-500 uppercase tracking-tighter">${coin.symbol.replace('USDT','')}</p>
+                                    <p class="text-sm font-black">${asset.name}</p>
+                                    <p class="text-[9px] text-gray-500 uppercase">${coin.symbol.replace('USDT','')}</p>
                                 </div>
                             </div>
                             <div class="text-left">
-                                <p class="text-sm font-black font-mono">${price < 1 ? price.toFixed(4) : price.toLocaleString()}$</p>
-                                <p class="text-[10px] font-bold ${colorClass}">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</p>
+                                <p class="text-sm font-black font-mono">${price.toLocaleString()}$</p>
+                                <p class="text-[10px] font-bold ${change >= 0 ? 'price-up' : 'price-down'}">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</p>
                             </div>
                         </div>
                     `;
                 });
-                updateWallet();
-            } catch (e) { console.error("Update Error"); }
+            } catch (e) { console.error("Error fetching market data"); }
         }
 
-        function updatePrimary(price, change) {
-            document.getElementById('main-price').innerText = price.toFixed(3);
-            const el = document.getElementById('price-change');
-            el.innerText = (change >= 0 ? '▲ +' : '▼ ') + change.toFixed(2) + '%';
-            el.className = `text-[11px] font-black px-3 py-1 rounded-full inline-block ${change >= 0 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`;
+        function showDetails(symbol, price, change, high, low) {
+            const asset = coinNames[symbol];
+            document.getElementById('modal-icon').src = asset.icon;
+            document.getElementById('modal-name').innerText = asset.name;
+            document.getElementById('modal-symbol').innerText = symbol;
+            document.getElementById('modal-price').innerText = parseFloat(price).toLocaleString() + "$";
+            document.getElementById('modal-iqd').innerText = (parseFloat(price) * iqdRate).toLocaleString() + " د.ع";
+            document.getElementById('stat-high').innerText = parseFloat(high).toLocaleString() + "$";
+            document.getElementById('stat-low').innerText = parseFloat(low).toLocaleString() + "$";
+
+            document.getElementById('chart-box').innerHTML = `<div id="tv_chart" style="height:100%"></div>`;
+            new TradingView.widget({
+                "autosize": true, "symbol": `BINANCE:${symbol}`, "interval": "60",
+                "timezone": "Etc/UTC", "theme": "dark", "style": "1", "locale": "ar",
+                "hide_top_toolbar": true, "container_id": "tv_chart", "backgroundColor": "#12151a"
+            });
+
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('detail-sheet').classList.add('active');
         }
 
-        function updateWallet() {
-            const target = document.getElementById('target-price').value || 0;
-            const hold = document.getElementById('my-hold').value || 0;
-            const result = target * hold;
-            document.getElementById('target-res').innerText = result.toLocaleString() + " $";
-            
-            if (lastTonPrice >= target && target > 0) {
-                if (Notification.permission === "granted") {
-                    new Notification("🚀 ADRIAN PRO: تم بلوغ الهدف!", { body: `سعر TON الآن ${lastTonPrice}$` });
-                }
-            }
+        function closeDetails() {
+            document.getElementById('detail-sheet').classList.remove('active');
+            document.getElementById('overlay').style.display = 'none';
         }
 
-        function requestNotify() {
-            Notification.requestPermission().then(p => { if(p === 'granted') alert("التنبيهات مفعلة ✅"); });
-        }
-
-        document.getElementById('target-price').addEventListener('input', updateWallet);
-        document.getElementById('my-hold').addEventListener('input', updateWallet);
-
-        setInterval(fetchMarketData, 5000);
-        fetchMarketData();
+        setInterval(fetchMarket, 5000);
+        fetchMarket();
     </script>
 </body>
 </html>
