@@ -181,7 +181,7 @@
                 language: "اللغة",
                 currency: "عملة العرض",
                 exchange_rate: "سعر الصرف (دينار)",
-                nav_chart: "المخطط",
+                nav_chart: "منصة التداول",
                 nav_market: "السوق",
                 nav_settings: "الإعدادات"
             },
@@ -216,7 +216,7 @@
 
         function updateLiveUsers() {
             // محاكاة أرقام مستخدمين واقعية
-            const baseUsers = 1432;
+            const baseUsers = 2000;
             const activeNow = Math.floor(Math.random() * (210 - 150 + 1)) + 150;
             document.getElementById('total-users-val').innerText = baseUsers.toLocaleString();
             document.getElementById('active-users-val').innerText = activeNow;
